@@ -1,6 +1,45 @@
 body {
+    font-size: 14px;
     font-family: monospace;
 }
 .title {
     font-size: 24px;
+}
+
+.stack {
+    text-decoration: underline overline;
+    vertical-align: super;
+    font-size: 8px;
+}
+
+#main {
+    height: 50%;
+    font-size: 20px;
+    white-space: pre-wrap;
+    display: inline;
+    box-sizing: content-box;
+    position: absolute;
+    left: 25%;
+    top: 50px;
+    width: 50%;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+#results {
+    height: 40%;
+    font-size: 20px;
+    white-space: pre-wrap;
+    display: inline;
+    position: absolute;
+    left: 25%;
+    bottom: 50px;
+    width: 50%;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+[contenteditable="true"]:active, [contenteditable="true"]:focus {
+   border:none;
+   outline:none;
 }
