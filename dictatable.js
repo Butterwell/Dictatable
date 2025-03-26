@@ -88,6 +88,82 @@ export function run(parsed) {
         });
       }
     },
+    'expand': (stack, i, item) => {
+      if (stack.length > 0) {
+        const going_away = stack.pop()
+        const tensor = going_away.expandDims(0)
+        going_away.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'nothing on stack to expand of',
+        });
+      }
+    },
+    'range': (stack, i, item) => {
+      if (stack.length > 0) {
+        const going_away = stack.pop()
+        if (going_away.rank === 0) {
+          console.log("rank 0")
+          const tensor = tf.range(0, going_away)
+          going_away.dispose()
+          stack.push(tensor)  
+        } else if (going_away.rank === 1) {
+          console.log("rank 1")
+          if (going_away.size === 1) {
+            console.log("size 1")
+            const to = going_away.arraySync()[0];
+            const tensor = tf.range(0, to)
+            going_away.dispose()
+            stack.push(tensor)
+          } else if (going_away.size === 2) {
+            const rows = going_away.arraySync()[0]
+            const cols = going_away.arraySync()[1]
+            const rowsTensor = tf.range(0,rows).expandDims(1).tile([1,cols]);
+            const colsTensor = tf.range(0,cols).expandDims(0).tile([rows,1]);
+            const tensor = tf.stack([rowsTensor, colsTensor], -1); // 2 x 3 or 3 x 2: -1 or 0
+            going_away.dispose()
+            stack.push(tensor)
+          } else {
+            errors.push({
+              index: i,
+              text: item,
+              message: 'range operates on tensor of rank 1 with sizes 1 and 2 only',  
+            })  
+          }
+         } else {
+          errors.push({
+            index: i,
+            text: item,
+            message: 'range operates on tensor of rank 0 or 1',  
+          })
+         }
+        tf.range(0, )
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'nothing on stack to generate range from',
+        });
+      }
+    },
+    // to 1d
+    'flatten': (stack, i, item) => {
+      if (stack.length > 0) {
+        const going_away = stack.pop()
+        const tensor = going_away.reshape([-1])
+        going_away.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'nothing on stack to expand of',
+        });
+      }
+    },
     'sum': (stack, i, item) => {
       if (stack.length > 0) {
         const tensor = stack.pop();
