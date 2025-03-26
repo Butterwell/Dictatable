@@ -107,11 +107,12 @@ export function run(parsed) {
         const going_away = stack.pop()
         if (going_away.rank === 0) {
           console.log("rank 0")
-          const tensor = tf.range(0, going_away)
+          const tensor = tf.range(0, going_away.arraySync(), 1, 'int32')
           going_away.dispose()
           stack.push(tensor)  
         } else if (going_away.rank === 1) {
           console.log("rank 1")
+          // Won't happen on input
           if (going_away.size === 1) {
             console.log("size 1")
             const to = going_away.arraySync()[0];
@@ -161,6 +162,44 @@ export function run(parsed) {
           index: i,
           text: item,
           message: 'nothing on stack to expand of',
+        });
+      }
+    },
+    'rotate': (stack, i, item) => {
+      if (stack.length > 1) {
+        const going_away_count = stack.pop()
+        if (going_away_count.rank === 0) {
+          const going_away_array = stack.pop()
+          const length = going_away_array.shape[0]
+          // Negatives work too
+          let k = tf.scalar(tf.mod(going_away_count, length).arraySync(),'int32');        
+          if (k === 0) {
+            stack.push(going_away_array)
+          } else {
+            const indices = tf.range(0, length, 1, 'int32');
+            const length_too = tf.scalar(length, 'int32');
+            const rotatedIndices = tf.mod(tf.add(indices, k), length_too); 
+            const tensor = tf.gather(going_away_array, rotatedIndices);
+            going_away_count.dispose()
+            going_away_array.dispose()
+            indices.dispose()
+            length_too.dispose()
+            rotatedIndices.dispose()
+            stack.push(tensor)  
+          }
+          k.dispose()
+        } else {
+          errors.push({
+            index: i,
+            text: item,
+            message: 'rotate count needs to be rank 0',
+          });
+        }
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'can not rotate, less than two tensors on stack',
         });
       }
     },
@@ -225,9 +264,16 @@ export function run(parsed) {
     const item = parsed[i];
     if (Array.isArray(item)) {
       try {
-        const tensor = tf.tensor(item);
-        stack.push(tensor);
-      } catch (error) {
+        // Default single number to rank 0
+        if (item.length === 1) {
+          const tensor = tf.tensor(item[0])
+          stack.push(tensor);  
+        } else {
+          // Multiple numbers are rank 1
+          const tensor = tf.tensor(item);
+          stack.push(tensor);  
+        }
+     } catch (error) {
         errors.push({
           index: i,
           text: item,
