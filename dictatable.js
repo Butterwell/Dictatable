@@ -12,6 +12,7 @@ export function run(parsed) {
   // TODO Create error function
   // TODO Rename all going_aways to name of parameter
   // TODO Delay tensorfication until tensor needed for inline arrays
+  // TODO Check that tensors on stack
 
   // For now, all int32 data.  
   const commands = {
@@ -45,7 +46,7 @@ export function run(parsed) {
     },
     'duplicate': (stack, i, item) => {
       if (stack.length > 0) {
-        stack.push(tf.identity(stack[stack.length - 1]))
+        stack.push(tf.clone(stack[stack.length - 1]))
       } else {
         errors.push({
           index: i,
@@ -64,6 +65,38 @@ export function run(parsed) {
           index: i,
           text: item,
           message: 'can not flip, less than two tensors on stack',
+        });
+      }
+    },
+    'subtract': (stack, i, item) => {
+      if (stack.length > 1) {
+        const b = stack.pop()
+        const a = stack.pop()
+        const tensor = tf.sub(a, b)
+        stack.push(tensor)
+        a.dispose()
+        b.dispose()
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'can not subtract, less than two tensors on stack',
+        });
+      }
+    },
+    'add': (stack, i, item) => {
+      if (stack.length > 1) {
+        const b = stack.pop()
+        const a = stack.pop()
+        const tensor = tf.add(a, b)
+        stack.push(tensor)
+        a.dispose()
+        b.dispose()
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'can not add, less than two tensors on stack',
         });
       }
     },
@@ -454,8 +487,10 @@ export function parse(a_scentence) {
     if (!a_scentence || a_scentence.trim() === "") {
       return [];
     }
+
+    let newline_stripped = a_scentence.replace(/(\r\n|\n|\r)/gm, ' ')
   
-    let words = a_scentence.split(" ").filter(element => element !== "");
+    let words = newline_stripped.split(" ").filter(element => element !== "");
     let phrases = find_phrases(words)
     let result = convert_numbers_to_arrays(phrases)
     return result
