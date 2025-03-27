@@ -4,10 +4,45 @@ export function run(parsed) {
   const stack = [];
   const errors = [];
 
-  const one_tensor = tf.scalar(1.0);
+  const one_tensor = tf.scalar(1.0, 'int32');
 
+  // TODO Inline document
+  // TODO Extract pop as helper function
+  // TODO Change to pop-on-success
+  // TODO Create error function
+  // TODO Rename all going_aways to name of parameter
+  // TODO Delay tensorfication until tensor needed for inline arrays
+
+  // For now, all int32 data.  
   const commands = {
-    // Assuming immediate context. For graph-building, ???
+    // https://js.tensorflow.org/api/latest/#conv2d
+    // "Narrowed" to 2d for Game of Life use case
+    'convolution': (stack, i, item) => {
+      if (stack.length > 1) {
+        // Force to float because int32 not supported
+        const filter = stack[stack.length - 1].toFloat()
+        const x = stack[stack.length - 2].toFloat()
+        if ((filter.rank === 4) && (x.rank === 3)) {
+          // Only float32 is supported for x
+          const y = tf.conv2d(x, filter, 1, 'same')
+          const d1 = stack.pop()
+          const d2 = stack.pop()
+          d1.dispose()
+          d2.dispose()
+          x.dispose()
+          filter.dispose()
+          stack.push(y)
+        } else {
+          console.log(filter.rank, x.rank)
+        }
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'convolution needs two tensors on stack',
+        });
+      }
+    },
     'duplicate': (stack, i, item) => {
       if (stack.length > 0) {
         stack.push(tf.identity(stack[stack.length - 1]))
@@ -99,6 +134,66 @@ export function run(parsed) {
           index: i,
           text: item,
           message: 'nothing on stack to expand of',
+        });
+      }
+    },
+    'ones': (stack, i, item) => {
+      if (stack.length > 0) {
+        const spec = stack.pop()
+        const shape = (spec.rank === 0 ? [spec.arraySync()] : spec.arraySync())
+        const tensor = tf.ones(shape, 'int32')
+        spec.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'nothing on stack to generate ones from',
+        });
+      }
+    },
+    'zeros': (stack, i, item) => {
+      if (stack.length > 0) {
+        const spec = stack.pop()
+        const shape = (spec.rank === 0 ? [spec.arraySync()] : spec.arraySync())
+        const tensor = tf.zeros(shape, 'int32')
+        spec.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'nothing on stack to generate zeros from',
+        });
+      }
+    },
+    // Array of random units
+    'random': (stack, i, item) => {
+      if (stack.length > 0) {
+        const spec = stack.pop()
+        const shape = (spec.rank === 0 ? [spec.arraySync()] : spec.arraySync())
+        const tensor = tf.randomUniform(shape, 0, 1)
+        spec.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'nothing on stack to generate zeros from',
+        });
+      }
+    },
+    'round': (stack, i, item) => {
+      if (stack.length > 0) {
+        const old = stack.pop()
+        const tensor = old.round()
+        old.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'nothing on stack to generate randoms from',
         });
       }
     },
@@ -285,11 +380,17 @@ export function run(parsed) {
       if (command) {
         command(stack, i, item);
       } else {
-        errors.push({
-          index: i,
-          text: item,
-          message: `Unknown command: ${item}`,
-        });
+        if (stack.length === 0) {
+          stack.push([item])
+        } else if (stack[stack.length - 1] instanceof tf.Tensor) {
+          stack.push([item])
+        } else if (Array.isArray(stack[stack.length - 1])) {
+          if (stack[stack.length - 1].length > 0 && typeof stack[stack.length - 1][0] === 'string') {
+            stack[stack.length - 1].push(item)
+          } else {
+            stack.push([item])
+          }
+        }
       }
     } else {
       errors.push({
@@ -355,12 +456,12 @@ export function parse(a_scentence) {
     }
   
     let words = a_scentence.split(" ").filter(element => element !== "");
-    let phrases = find_renders(words)
+    let phrases = find_phrases(words)
     let result = convert_numbers_to_arrays(phrases)
     return result
 }
 
-function find_renders(wordArray) {
+function find_phrases(wordArray) {
     const phrasesToFind = [
       ["render", "to", "console"],
       ["render", "to", "new", "browser", "tab"],
