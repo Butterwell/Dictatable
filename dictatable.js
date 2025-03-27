@@ -16,6 +16,22 @@ export function run(parsed) {
 
   // For now, all int32 data.  
   const commands = {
+    'equal': (stack, i, item) => {
+      if (stack.length > 1) {
+        const b = stack.pop()
+        const a = stack.pop()
+        const tensor = tf.equal(a, b)
+        a.dispose()
+        b.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'equal needs two tensors on stack',
+        });
+      }
+    },
     // https://js.tensorflow.org/api/latest/#conv2d
     // "Narrowed" to 2d for Game of Life use case
     'convolution': (stack, i, item) => {
