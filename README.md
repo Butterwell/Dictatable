@@ -58,4 +58,4 @@ The following are some ways, some means, some likely specifications, a wishlist,
 
 ## Implementation Notes
 
-The computational engine is TensorFlow.js. The computational engine will likely become a hybrid later (lmuch later).
+The computational engine is TensorFlow.js. The computational engine will likely become a hybrid later (much later).
