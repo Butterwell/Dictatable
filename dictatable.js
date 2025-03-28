@@ -16,6 +16,53 @@ export function run(parsed) {
 
   // For now, all int32 data.  
   const commands = {
+    'peek': (stack, i, item) => {
+      const spec = stack.pop()
+      const count = (spec.rank === 0 ? [spec.arraySync()] : spec.arraySync())
+      if (stack.length >= count) {
+        const tensor = stack[stack.length - count].clone()
+        stack.push(tensor)
+        spec.dispose()
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'peek needs some tensors on stack',
+        });
+      }
+    },
+    'and': (stack, i, item) => {
+      if (stack.length > 1) {
+        const b = stack.pop()
+        const a = stack.pop()
+        const tensor = tf.logicalAnd(a, b)
+        a.dispose()
+        b.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'and needs two tensors on stack',
+        });
+      }
+    },
+    'or': (stack, i, item) => {
+      if (stack.length > 1) {
+        const b = stack.pop()
+        const a = stack.pop()
+        const tensor = tf.logicalOr(a, b)
+        a.dispose()
+        b.dispose()
+        stack.push(tensor)
+      } else {
+        errors.push({
+          index: i,
+          text: item,
+          message: 'or needs two tensors on stack',
+        });
+      }
+    },
     'equal': (stack, i, item) => {
       if (stack.length > 1) {
         const b = stack.pop()

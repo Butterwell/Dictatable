@@ -14,29 +14,36 @@ body {
 
 #main {
     height: 50%;
-    font-size: 20px;
+    font-size: 16px;
     white-space: pre-wrap;
     display: inline;
     box-sizing: content-box;
     position: absolute;
-    left: 15%;
+    left: 25%;
     top: 50px;
-    width: 70%;
+    width: 60%;
     overflow-y: scroll;
     scrollbar-width: none;
 }
 
 #results {
-    height: 40%;
-    font-size: 20px;
+    height: 30%;
+    font-size: 16px;
     white-space: pre-wrap;
     display: inline;
     position: absolute;
-    left: 15%;
-    bottom: 50px;
-    width: 70%;
+    left: 25%;
+    bottom: 30px;
+    width: 60%;
     overflow-y: scroll;
     scrollbar-width: none;
+}
+
+.sidebar {
+    font-size: 12px;
+    margin: 10px;
+    display: inline;
+    white-space: pre-wrap;
 }
 
 [contenteditable="true"]:active, [contenteditable="true"]:focus {
