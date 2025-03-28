@@ -4,7 +4,7 @@ Dictatable is an array and stack oriented language that is designed to be dictat
 
 As you might guess, the primary goal is to make a useful language that is dictatable on a smart phone.
 
-To that end, there will be a series of informal experiments (perhaps formal experiments later) with the intent to make the the language easier to learn and use. To create a language with "low floors and high ceilings".
+To that end, there will be a series of informal experiments (perhaps formal experiments later) with the intent to improve useability and learnability. To create a language with "low floors and high ceilings".
 
 At that end, make Dictatable a delightful tasty efficient language with especially good mouth feel.
 
