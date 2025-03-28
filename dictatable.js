@@ -6,15 +6,14 @@ export function run(parsed) {
 
   const one_tensor = tf.scalar(1.0, 'int32');
 
-  // TODO Inline document
   // TODO Extract pop as helper function
   // TODO Change to pop-on-success
   // TODO Create error function
   // TODO Rename all going_aways to name of parameter
   // TODO Delay tensorfication until tensor needed for inline arrays
-  // TODO Check that tensors on stack
 
-  // For now, all int32 data.  
+  // For now, all int32 data.
+
   const commands = {
     'peek': (stack, i, item) => {
       const spec = stack.pop()
@@ -451,8 +450,30 @@ export function run(parsed) {
     },
   };
 
+  let in_is = false
+
   for (let i = 0; i < parsed.length; i++) {
     const item = parsed[i];
+    // Deal with is ... period
+    if (item === "is") {
+      if (stack.length > 0) {
+        if (Array.isArray(stack[stack.length - 1])) {
+          if (typeof stack[stack.length - 1][0] === 'string') {
+            in_is = true
+          }
+        }
+      }
+    }
+    if (in_is) {
+      stack[stack.length - 1].push(item)
+      if (item === "period" || item[item.length -1] === ".") {
+        in_is = false
+        const definition = stack.pop()
+        // TODO Add definition to definitions
+      }
+      continue
+    }
+    // TODO If there is a string array on the stack lookup in definitions
     if (Array.isArray(item)) {
       try {
         // Default single number to rank 0
