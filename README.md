@@ -1,14 +1,28 @@
 # Dictatable
 
-Dictatable is a toy language. It certainly will become a generally useful language if all the elements of the one issue to rule them all is completed. It may become a generally useful language before then.
+Dictatable is an array and stack oriented language that is designed to be dictatable.
 
-Dictatable has one primary goal: to be able to dictate a computational language on a smart phone.
+As you might guess, the primary goal is to make a useful language that is dictatable on a smart phone.
 
-Soon, or eventually, I'd like to be able to remove this line from this file and convey the following with no irony:
+To that end, there will be a series of informal experiments (perhaps formal experiments later) with the intent to make the the language easier to learn and use. To create a language with "low floors and high ceilings".
 
-Dictatable is a delightful, tasty, efficient, language without peer that aims to be many things for many people with especially good mouth feel. This language is reinventing what it means to compute!
+At that end, make Dictatable a delightful tasty efficient language with especially good mouth feel.
 
-There are some universal usability goals (and solutions) that are worthy of mention (mostly because they aren't mentioned enough):
+## Installation
+
+Clone this repo and load the top level directory as an unpacked browser extension (Chromium based browsers).
+
+OR
+
+Go to [Dictatable Online](https://butterwell.github.io/Dictatable)
+
+In both cases, (as of now) there is one "notebook", one source, which is persisted to localStorage. If you want two sessions, do both. They are saved separately. Three? Run a webserver as well. ;)
+
+## Means
+
+The following are some ways, some means, some likely specifications, a wishlist, for the language.
+
+### Usability Wishes
 - Don't waste my time: sub-framerate (at 60 frames per second) compilation and updates, reactive
 - At hand: runs in a browser page
 - Obvious: shows what it's done
@@ -16,9 +30,7 @@ There are some universal usability goals (and solutions) that are worthy of ment
 - Editable: meta words that modify code
 - Minimize cognitive load: use words (assumed) and other methods, to be discovered
 
-The interface and computational environment is web browsers. The computational engine is TensorFlow.js.
-
-The following is my current "shopping list" of additional attributes
+### Other Wishes
 - Immediate, reactive, result visibility (like spreadsheets)
 - Tables (and arrays) as basic unit
 - Multi-lingual: translatable into other languages
@@ -41,13 +53,9 @@ The following is my current "shopping list" of additional attributes
 - Separate the method of calculation from the intent of the calculation (naming)
 - Strive for minimal headspace
 - Expand supported operations (keywords and phrases) into various domains
+- Library support
+- Multipule documents
 
-## Installation
+## Implementation Notes
 
-Clone this repo and load the top level directory as an unpacked extension.
-
-OR
-
-Go to [Dictatable Online](https://butterwell.github.io/Dictatable)
-
-In both cases, source is saved to localStorage.
+The computational engine is TensorFlow.js. The computational engine will likely become a hybrid later (lmuch later).
