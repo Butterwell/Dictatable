@@ -32,3 +32,5 @@ The following are some ways, some means, some likely specifications, a wishlist,
 ## Implementation Notes
 
 The computational engine is TensorFlow.js. The computational engine will likely become a hybrid later (much later).
+
+The roadmap is at: [One Issue to Rule Them All](https://github.com/Butterwell/Dictatable/issues/1).
