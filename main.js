@@ -13,7 +13,7 @@
   
 // chainGraphs();
 
-import { parse, run } from "./dictatable.js"
+import { gather, run } from "./dictatable.js"
 
 // console.log(parse("1 2 3 sum"))
 
@@ -102,7 +102,7 @@ function view() {
 // TODO Generate render of text and results
     //model.main.innerHTML = model.content
 
-    results.innerHTML  = render(run(parse(model.content)))
+    results.innerHTML  = render(run(gather(model.content)))
 }
 
 main(init, update, view)

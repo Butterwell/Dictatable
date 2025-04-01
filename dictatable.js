@@ -1,4 +1,7 @@
 // TODO Return as a single list of offset to code, operation, and result (stack, errors)
+
+import { convert_numbers_to_arrays } from "./convert_numbers_to_arrays.js";
+
 // TODO Put error on stack ???
 export function run(parsed) {
   const stack = [];
@@ -424,7 +427,7 @@ export function run(parsed) {
         });
       }
     },
-    'render to console': (stack, i, item) => {
+    'console render': (stack, i, item) => {
       if (stack.length > 0) {
         const tensor = stack[stack.length - 1];
         tensor.print();
@@ -436,7 +439,7 @@ export function run(parsed) {
         });
       }
     },
-    'render to new browser tab': (stack, i, item) => {
+    'browser tab render': (stack, i, item) => {
       if (stack.length > 0) {
         const tensor = stack[stack.length - 1];
         tensor.print();
@@ -451,6 +454,7 @@ export function run(parsed) {
   };
 
   let in_is = false
+  let in_repeat_block = false
 
   for (let i = 0; i < parsed.length; i++) {
     const item = parsed[i];
@@ -472,6 +476,14 @@ export function run(parsed) {
         // TODO Add definition to definitions
       }
       continue
+    }
+    // repeat ... every n seconds
+    // A repeat block is a lambda (like an "is")
+    if (item === "repeat") {
+      in_repeat_block = true
+    }
+    if (item === "end") {
+      in_repeat_block = false
     }
     // TODO If there is a string array on the stack lookup in definitions
     if (Array.isArray(item)) {
@@ -523,11 +535,11 @@ export function run(parsed) {
 
 export function test_run() {
 // Examples
-const example1 = [[1, 2, 3], 'sum', 'render to console'];
+const example1 = [[1, 2, 3], 'sum', 'console render'];
 const result1 = run(example1);
 console.log('Example 1:', result1.errors);
 
-const example2 = [[1, 2, 3], [4, 5, 6], 'sum', 'render to console'];
+const example2 = [[1, 2, 3], [4, 5, 6], 'sum', 'console render'];
 const result2 = run(example2);
 console.log('Example 2:', result2.errors);
 
@@ -535,7 +547,7 @@ const example3 = [[1, 2, 3], 'invalid command'];
 const result3 = run(example3);
 console.log('Example 3:', result3.errors);
 
-const example4 = [[1, 2, 3], 'sum', 'sum', 'render to console'];
+const example4 = [[1, 2, 3], 'sum', 'sum', 'console render'];
 const result4 = run(example4);
 console.log('Example 4:', result4.errors);
 
@@ -543,7 +555,7 @@ const example5 = ['sum'];
 const result5 = run(example5);
 console.log('Example 5:', result5.errors);
 
-const example6 = [[1,2,3], [4,5,6], 'render to console', 'render to new browser tab', 'sum', 'render to console'];
+const example6 = [[1,2,3], [4,5,6], 'console render', 'browser tab render', 'sum', 'console render'];
 const result6 = run(example6);
 //console.log('Example 6:', result6);
 
@@ -551,7 +563,7 @@ const example7 = [[1,2,3], 55, 'sum'];
 const result7 = run(example7);
 console.log('Example 7:', result7);
 
-const example8 = [[1.1, 2.2, 3.3], 'sum', 'render to console'];
+const example8 = [[1.1, 2.2, 3.3], 'sum', 'console render'];
 const result8 = run(example8);
 console.log('Example 8:', result8.stack[0]);
 
@@ -560,7 +572,7 @@ const result9 = run(example9);
 console.log('Example 9:', result9);
 }
 
-export function parse(a_scentence) {
+export function gather(a_scentence) {
     /**
      * Parses a sentence into an array of words, using spaces as delimiters.
      *
@@ -575,134 +587,69 @@ export function parse(a_scentence) {
     let newline_stripped = a_scentence.replace(/(\r\n|\n|\r)/gm, ' ')
   
     let words = newline_stripped.split(" ").filter(element => element !== "");
-    let phrases = find_phrases(words)
+    let phrases = combine_phrases(words)
     let result = convert_numbers_to_arrays(phrases)
     return result
 }
 
-function find_phrases(wordArray) {
-    const phrasesToFind = [
-      ["render", "to", "console"],
-      ["render", "to", "new", "browser", "tab"],
-    ];
-  
+const phrases = {
+  // console render
+  'console': {
+    'render': 'console render' 
+    },
+    // browser tab render
+  'browser' : {
+      'tab': {
+        'render': 'browser tab render'
+      }
+  }
+}
+
+function combine_phrases(words) {  
     const result = [];
     let i = 0;
   
-    while (i < wordArray.length) {
-      let matchFound = false;
-  
-      for (const phrase of phrasesToFind) {
-        const phraseLen = phrase.length;
-        if (i + phraseLen <= wordArray.length && wordArray.slice(i, i + phraseLen).every((val, index) => val === phrase[index])) {
-          result.push(phrase.join(" "));
-          i += phraseLen;
-          matchFound = true;
-          break;
-        }
+    while (i < words.length) {
+      let tre = phrases
+      let j = i
+      while ((tre[words[j]] !== undefined) && (typeof tre[words[j]] !== 'string')) {
+        tre = tre[words[j]]
+        j++
       }
-  
-      if (!matchFound) {
-        result.push(wordArray[i]);
-        i++;
+      if (typeof tre[words[j]] === 'string') {
+        result.push(tre[words[j]])
+        i = j
+      } else {
+        result.push(words[i])
       }
+      i++;
     }
-  
     return result;
   }
 
-function test_find_renders() {  
+function test_combine_phrases() {  
   // Example Usage:
-  const wordArray1 = ["some", "random", "words", "render", "to", "console", "more", "words"];
-  const result1 = find_renders(wordArray1);
+  const wordArray1 = ["some", "random", "words", "console", "render", "more", "words"];
+  const result1 = combine_phrases(wordArray1);
   console.log(result1);
   
-  const wordArray2 = ["start", "render", "to", "new", "browser", "tab", "end"];
-  const result2 = find_renders(wordArray2);
+  const wordArray2 = ["start", "browser", "tab", "render", "end"];
+  const result2 = combine_phrases(wordArray2);
   console.log(result2);
   
   const wordArray3 = ["start", "render", "to", "console", "middle", "render", "to", "new", "browser", "tab", "end"];
-  const result3 = find_renders(wordArray3);
+  const result3 = combine_phrases(wordArray3);
   console.log(result3);
   
   const wordArray4 = ["nothing","to","find"];
-  const result4 = find_renders(wordArray4);
+  const result4 = combine_phrases(wordArray4);
   console.log(result4);
   
   const wordArray5 = ["render","to","console","not","render","to","new","browser","tab"];
-  const result5 = find_renders(wordArray5);
+  const result5 = combine_phrases(wordArray5);
   console.log(result5);
   
   const wordArray6 = ["render","to","console","render","to","new","browser","tab","and","more"];
-  const result6 = find_renders(wordArray6);
+  const result6 = combine_phrases(wordArray6);
   console.log(result6);
-}
-
-function convert_numbers_to_arrays(words) {
-    const numberWords = {
-      'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-      'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-      'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14,
-      'fifteen': 15, 'sixteen': 16, 'seventeen': 17, 'eighteen': 18,
-      'nineteen': 19, 'twenty': 20, 'thirty': 30, 'forty': 40,
-      'fifty': 50, 'sixty': 60, 'seventy': 70, 'eighty': 80, 'ninety': 90,
-      'hundred': 100, 'thousand': 1000, 'million': 1000000, 'billion': 1000000000
-    };
-  
-    const result = [];
-    let tempNumber = [];
-  
-    for (const word of words) {
-      const num = parseInt(word);
-      const writtenNum = numberWords[word.toLowerCase()];
-  
-      if (!isNaN(num)) {
-        tempNumber.push(num);
-      } else if (writtenNum !== undefined) {
-        tempNumber.push(writtenNum);
-      } else {
-        if (tempNumber.length) {
-          result.push(tempNumber);
-          tempNumber = [];
-        }
-        result.push(word);
-      }
-    }
-  
-    if (tempNumber.length) {
-      result.push(tempNumber);
-    }
-  
-    return result;
-  }
-
-function test_convert_numbers_to_arrays() {
-  // Example usage:
-  const words1 = ['one', 'two', 'three', 'apple', 'four', '5', 'six', '7', 'eight', 'nine', 'ten', 'hello', '11', '12', 'world','13'];
-  const words2 = ['apple', '1', 'two', '3', 'four', 'banana'];
-  const words3 = ['one', 'apple', 'two', 'banana', 'three'];
-  const words4 = ['1', '2', '3', 'apple', '4', '5', 'banana', '6'];
-  const words5 = ['one', '1', 'two', '2', 'three', '3', 'apple'];
-  const words6 = ['apple','one', '1'];
-  const words7 = ['1','one','apple'];
-  const words8 = ['1','2','one','two', '3','4','apple'];
-  const words9 = ['one','two','three','four','five','six','seven','eight','nine','ten'];
-  const words10 = ['1','2','3','4','5','6','7','8','9','10'];
-  const words11 = ['one'];
-  const words12 = ['1'];
-  const words13 = ['apple','1','apple'];
-  
-  console.log(convert_numbers_to_arrays(words1));
-  console.log(convert_numbers_to_arrays(words2));
-  console.log(convert_numbers_to_arrays(words3));
-  console.log(convert_numbers_to_arrays(words4));
-  console.log(convert_numbers_to_arrays(words5));
-  console.log(convert_numbers_to_arrays(words6));
-  console.log(convert_numbers_to_arrays(words7));
-  console.log(convert_numbers_to_arrays(words8));
-  console.log(convert_numbers_to_arrays(words9));
-  console.log(convert_numbers_to_arrays(words10));
-  console.log(convert_numbers_to_arrays(words11));
-  console.log(convert_numbers_to_arrays(words12));
-  console.log(convert_numbers_to_arrays(words13));
 }
