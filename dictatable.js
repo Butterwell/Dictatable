@@ -474,6 +474,8 @@ const built_in_commands = {
   'browser tab render': browserTabRender,
 };
 
+const definitions = {}
+
 export function run(parsed) {
   const stack = [];
   const errors = [];
@@ -586,11 +588,11 @@ export function text_processor(text) {
     // Gather repeat blocks
     //let c = repeat_blocks(b)
     // Expand / replace from "is" definitions
-    //let d = expand_definitions(c)
+    let c = expand_definitions(b)
     // Gather numbers
-    let c = convert_numbers_to_arrays(b)
+    let d = convert_numbers_to_arrays(c)
 
-    return c
+    return d
 }
 
 const phrases = {
@@ -629,8 +631,6 @@ function combine_phrases(words) {
 }
 
 // TODO Multiple word definitions (new line structure?)
-// TODO Update global "phrases"
-// TODO Make commands be global - dictionary
 // TODO Check for name conflict with is
 // TODO Pass in bracketing words (is ordering a problem?) (multilanguage support)
 
@@ -638,19 +638,9 @@ function is_definition(words) {
   let in_is = false
 
   const result = [];
-  let definitions = {}
   let i = 0;
 
   while (i < words.length) {
-    // Deal with is ... period
-    if (words[i] === "is") {
-      if (result.length > 0) {
-        if (typeof result[result.length - 1] === 'string') {
-          in_is = true
-          definitions[result[result.length - 1]] = []
-        }
-      }
-    }
     if (in_is) {
       if (words[i] === "period") {
         in_is = false
@@ -665,6 +655,13 @@ function is_definition(words) {
         result.pop()
       } else {
         definitions[result[result.length -1]].push(words[i])
+      }
+    } else if (words[i] === "is") {
+      if (result.length > 0) {
+        if (typeof result[result.length - 1] === 'string') {
+          in_is = true
+          definitions[result[result.length - 1]] = []
+        }
       }
     } else {
       result.push(words[i])
@@ -685,6 +682,30 @@ function repeat_block(words) {
     if (item === "end") {
       in_repeat_block = false
     }
+}
+
+function expand_definitions_once(words) {
+  const result = [];
+
+  for (const word of words) {
+    if (definitions.hasOwnProperty(word)) {
+      // If the word exists as a key in the substitutionMap,
+      // spread the corresponding array into the result.
+      result.push(...definitions[word]);
+    } else {
+      // Otherwise, just push the original word.
+      result.push(word);
+    }
+  }
+  return result;
+}
+
+// Expand 3 times, maximum. Heristic.
+function expand_definitions(words) {
+  const a = expand_definitions_once(words)
+  const b = expand_definitions_once(a)
+  const c = expand_definitions_once(b)
+  return c
 }
 
 function test_combine_phrases() {  
