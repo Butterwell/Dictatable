@@ -542,25 +542,28 @@ const result9 = run(example9);
 console.log('Example 9:', result9);
 }
 
-export function gather(a_scentence) {
-    /**
-     * Parses a sentence into an array of words, using spaces as delimiters.
-     *
-     * @param {string} a_scentence - The sentence to parse.
-     * @returns {string[]} An array of words. If the sentence is empty or contains only spaces,
-     * an empty array is returned.
-     */
-    if (!a_scentence || a_scentence.trim() === "") {
+export function text_processor(text) {
+    if (!text || text.trim() === "") {
       return [];
     }
 
-    let newline_stripped = a_scentence.replace(/(\r\n|\n|\r)/gm, ' ')
+    // If want to make new lines semantic, this is where to do it.
+    let newline_stripped = text.replace(/(\r\n|\n|\r)/gm, ' ')
   
+    // Could be combined, but just do independent gathers
     let words = newline_stripped.split(" ").filter(element => element !== "");
-    let words_too = is_definition(words)
-    let phrases = combine_phrases(words_too)
-    let result = convert_numbers_to_arrays(phrases)
-    return result
+    // Gather is definitions
+    let a = is_definition(words)
+    // Gather known phrases
+    let b = combine_phrases(a)
+    // Gather repeat blocks
+    //let c = repeat_blocks(b)
+    // Expand / replace from "is" definitions
+    //let d = expand_definitions(c)
+    // Gather numbers
+    let c = convert_numbers_to_arrays(b)
+
+    return c
 }
 
 const phrases = {
