@@ -453,38 +453,8 @@ export function run(parsed) {
     },
   };
 
-  let in_is = false
-  let in_repeat_block = false
-
   for (let i = 0; i < parsed.length; i++) {
     const item = parsed[i];
-    // Deal with is ... period
-    if (item === "is") {
-      if (stack.length > 0) {
-        if (Array.isArray(stack[stack.length - 1])) {
-          if (typeof stack[stack.length - 1][0] === 'string') {
-            in_is = true
-          }
-        }
-      }
-    }
-    if (in_is) {
-      stack[stack.length - 1].push(item)
-      if (item === "period" || item[item.length -1] === ".") {
-        in_is = false
-        const definition = stack.pop()
-        // TODO Add definition to definitions
-      }
-      continue
-    }
-    // repeat ... every n seconds
-    // A repeat block is a lambda (like an "is")
-    if (item === "repeat") {
-      in_repeat_block = true
-    }
-    if (item === "end") {
-      in_repeat_block = false
-    }
     // TODO If there is a string array on the stack lookup in definitions
     if (Array.isArray(item)) {
       try {
@@ -625,7 +595,51 @@ function combine_phrases(words) {
       i++;
     }
     return result;
+}
+
+function is_definition(words) {
+  let in_is = false
+
+  const result = [];
+  let i = 0;
+
+  while (i < words.length) {
+    // Deal with is ... period
+    if (item === "is") {
+      if (stack.length > 0) {
+        if (Array.isArray(stack[stack.length - 1])) {
+          if (typeof stack[stack.length - 1][0] === 'string') {
+            in_is = true
+          }
+        }
+      }
+    }
+    if (in_is) {
+      stack[stack.length - 1].push(item)
+      if (item === "period" || item[item.length -1] === ".") {
+        in_is = false
+        const definition = stack.pop()
+        // TODO Add definition to definitions
+      }
+      continue
+    }
+    i++
   }
+  return result
+}
+
+function repeat_block(words) {
+    let in_repeat_block = false
+
+    // repeat ... every n seconds
+    // A repeat block is a lambda (like an "is")
+    if (item === "repeat") {
+      in_repeat_block = true
+    }
+    if (item === "end") {
+      in_repeat_block = false
+    }
+}
 
 function test_combine_phrases() {  
   // Example Usage:
