@@ -557,7 +557,8 @@ export function gather(a_scentence) {
     let newline_stripped = a_scentence.replace(/(\r\n|\n|\r)/gm, ' ')
   
     let words = newline_stripped.split(" ").filter(element => element !== "");
-    let phrases = combine_phrases(words)
+    let words_too = is_definition(words)
+    let phrases = combine_phrases(words_too)
     let result = convert_numbers_to_arrays(phrases)
     return result
 }
@@ -597,31 +598,46 @@ function combine_phrases(words) {
     return result;
 }
 
+// TODO Multiple word definitions (new line structure?)
+// TODO Update global "phrases"
+// TODO Make commands be global - dictionary
+// TODO Check for name conflict with is
+// TODO Pass in bracketing words (is ordering a problem?)
+
 function is_definition(words) {
   let in_is = false
 
   const result = [];
+  let definitions = {}
   let i = 0;
 
   while (i < words.length) {
     // Deal with is ... period
-    if (item === "is") {
-      if (stack.length > 0) {
-        if (Array.isArray(stack[stack.length - 1])) {
-          if (typeof stack[stack.length - 1][0] === 'string') {
-            in_is = true
-          }
+    if (words[i] === "is") {
+      if (result.length > 0) {
+        if (typeof result[result.length - 1] === 'string') {
+          in_is = true
+          definitions[result[result.length - 1]] = []
         }
       }
     }
     if (in_is) {
-      stack[stack.length - 1].push(item)
-      if (item === "period" || item[item.length -1] === ".") {
+      if (words[i] === "period") {
         in_is = false
-        const definition = stack.pop()
-        // TODO Add definition to definitions
+        result.pop()
+      } else if (words[i][words[i].length -1] === ".") {
+        // strip period
+        let w = words[i].slice(0, -1);
+        if (w.length > 0) {
+          definitions[result[result.length -1]].push(w)
+        }
+        in_is = false
+        result.pop()
+      } else {
+        definitions[result[result.length -1]].push(words[i])
       }
-      continue
+    } else {
+      result.push(words[i])
     }
     i++
   }
