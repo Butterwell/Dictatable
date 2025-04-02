@@ -1,23 +1,16 @@
-// TODO Return as a single list of offset to code, operation, and result (stack, errors)
-
 import { convert_numbers_to_arrays } from "./convert_numbers_to_arrays.js";
 
-// TODO Put error on stack ???
 export function run(parsed) {
   const stack = [];
   const errors = [];
 
   const one_tensor = tf.scalar(1.0, 'int32');
 
-  // TODO Extract pop as helper function
-  // TODO Change to pop-on-success
-  // TODO Create error function
-  // TODO Rename all going_aways to name of parameter
-  // TODO Delay tensorfication until tensor needed for inline arrays
+  // TODO Make stack-height errors part of text_processor (as a pass)
+  // TODO Extract built_in_commands functions (de-lambda) (in preporation for multi-languge and synnonyms)
 
   // For now, all int32 data.
-
-  const commands = {
+  const built_in_commands = {
     'peek': (stack, i, item) => {
       const spec = stack.pop()
       const count = (spec.rank === 0 ? [spec.arraySync()] : spec.arraySync())
@@ -475,7 +468,7 @@ export function run(parsed) {
         });
       }
     } else if (typeof item === 'string') {
-      const command = commands[item.toLowerCase()];
+      const command = built_in_commands[item.toLowerCase()];
       if (command) {
         command(stack, i, item);
       } else {
@@ -605,7 +598,7 @@ function combine_phrases(words) {
 // TODO Update global "phrases"
 // TODO Make commands be global - dictionary
 // TODO Check for name conflict with is
-// TODO Pass in bracketing words (is ordering a problem?)
+// TODO Pass in bracketing words (is ordering a problem?) (multilanguage support)
 
 function is_definition(words) {
   let in_is = false
