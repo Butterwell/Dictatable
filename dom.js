@@ -52,6 +52,24 @@ export function storageAvailable(type) {
     }
 }
 
+let lastTick = 0
+let on_tick_update_function = () => ""
+
+export function start_ticker(on_tick) {
+    on_tick_update_function = on_tick
+    lastTick = performance.now()
+    window.requestAnimationFrame(tick)
+}
+
+function tick(nowish) {
+  window.requestAnimationFrame(tick)
+
+  const delta = nowish - lastTick
+  lastTick = nowish
+
+  on_tick_update_function(delta)
+}
+
 function isCursorInTextNode() {
     const selection = window.getSelection();
     if (selection.rangeCount === 0) {

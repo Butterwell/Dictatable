@@ -19,7 +19,7 @@ function peek(stack, i, item, errors) {
 }
 
 function and(stack, i, item, errors) {
-  if (stack.length > 1) {
+  if (stack.length > 1 && stack[stack.length - 1].dtype === 'bool' && stack[stack.length - 2].dtype === 'bool') {
     const b = stack.pop();
     const a = stack.pop();
     const tensor = tf.logicalAnd(a, b);
@@ -36,7 +36,7 @@ function and(stack, i, item, errors) {
 }
 
 function or(stack, i, item, errors) {
-  if (stack.length > 1) {
+  if (stack.length > 1 && stack[stack.length - 1].dtype === 'bool' && stack[stack.length - 2].dtype === 'bool') {
     const b = stack.pop();
     const a = stack.pop();
     const tensor = tf.logicalOr(a, b);
@@ -52,14 +52,20 @@ function or(stack, i, item, errors) {
   }
 }
 
+import { render_item } from "./render.js";
+// TODO Error if not same type rather than ignore?
 function equal(stack, i, item, errors) {
   if (stack.length > 1) {
-    const b = stack.pop();
-    const a = stack.pop();
-    const tensor = tf.equal(a, b);
-    a.dispose();
-    b.dispose();
-    stack.push(tensor);
+    const b = stack[stack.length - 1]
+    const a = stack[stack.length - 2]
+    if (a.dtype === b.dtype) {
+      const tensor = tf.equal(a, b);
+      stack.pop()
+      stack.pop()
+      a.dispose();
+      b.dispose();
+      stack.push(tensor);
+    }
   } else {
     errors.push({
       index: i,
@@ -70,7 +76,7 @@ function equal(stack, i, item, errors) {
 }
 
 function convolution(stack, i, item, errors) {
-  if (stack.length > 1) {
+  if (stack.length > 1 && stack[stack.length - 1].dtype !== 'string' && stack[stack.length - 2].dtype !== 'string') {
     const filter = stack[stack.length - 1].toFloat();
     const x = stack[stack.length - 2].toFloat();
     if ((filter.rank === 4) && (x.rank === 3)) {
@@ -121,7 +127,7 @@ function flip(stack, i, item, errors) {
 }
 
 function subtract(stack, i, item, errors) {
-  if (stack.length > 1) {
+  if (stack.length > 1 && stack[stack.length - 1].dtype !== 'string' && stack[stack.length - 2].dtype !== 'string') {
     const b = stack.pop();
     const a = stack.pop();
     const tensor = tf.sub(a, b);
@@ -138,7 +144,7 @@ function subtract(stack, i, item, errors) {
 }
 
 function add(stack, i, item, errors) {
-  if (stack.length > 1) {
+  if (stack.length > 1 && stack[stack.length - 1].dtype !== 'string' && stack[stack.length - 2].dtype !== 'string') {
     const b = stack.pop();
     const a = stack.pop();
     const tensor = tf.add(a, b);
@@ -475,17 +481,46 @@ const built_in_commands = {
 };
 
 const definitions = {}
+const repeats = []
+
+// 100 every Update repeat
+// Place every specifications into repeats array
+function every_repeat_phrase(words, i, stack) {
+  if (words[i] !== "every") {
+    console.log("every fail")
+    return i;
+  }
+
+  if (stack.length === 0) {
+    console.log("every fail: nothing on stack")
+    return i;
+  }
+
+  let time = stack.pop()
+  let code = []
+
+  i++ // drop "every"
+
+  let repeat = { time, code }
+
+  while ((i < words.length) && (words[i] !== "repeat")) {
+    repeat.code.push(words[i])
+    i++
+  }
+  repeats.push(repeat)
+  return i
+}
 
 export function run(parsed) {
   const stack = [];
   const errors = [];
 
   // TODO Make stack-height errors part of text_processor (as a pass)
-
   for (let i = 0; i < parsed.length; i++) {
     const item = parsed[i];
-    // TODO If there is a string array on the stack lookup in definitions
-    if (Array.isArray(item)) {
+    if (item === "every") {
+      i = every_repeat_phrase(parsed, i, stack)
+    } else if (Array.isArray(item)) {
       try {
         // Default single number to rank 0
         if (item.length === 1) {
@@ -506,7 +541,7 @@ export function run(parsed) {
     } else if (typeof item === 'string') {
       const command = built_in_commands[item.toLowerCase()];
       if (command) {
-        command(stack, i, item);
+        command(stack, i, item, errors);
       } else {
         if (stack.length === 0) {
           stack.push([item])
@@ -585,13 +620,11 @@ export function text_processor(text) {
     let a = is_definition(words)
     // Gather known phrases
     let b = combine_phrases(a)
-    // Gather repeat blocks
-    //let c = repeat_blocks(b)
     // Expand / replace from "is" definitions
     let c = expand_definitions(b)
     // Gather numbers
     let d = convert_numbers_to_arrays(c)
-
+ 
     return d
 }
 
@@ -669,19 +702,6 @@ function is_definition(words) {
     i++
   }
   return result
-}
-
-function repeat_block(words) {
-    let in_repeat_block = false
-
-    // repeat ... every n seconds
-    // A repeat block is a lambda (like an "is")
-    if (item === "repeat") {
-      in_repeat_block = true
-    }
-    if (item === "end") {
-      in_repeat_block = false
-    }
 }
 
 function expand_definitions_once(words) {

@@ -26,7 +26,7 @@ import { text_processor, run } from "./dictatable.js"
 // test_run()
 
 
-import { create_load_function, create_save_function, create_keydown_function } from './dom.js'
+import { create_load_function, create_save_function, create_keydown_function, start_ticker } from './dom.js'
 
 // Event Message => Update => Model => View
 // The inital model is text.
@@ -76,6 +76,20 @@ function init(update, view) {
 
     window.addEventListener("load", onLoad)
 
+    let total_time = 0
+    let once = false
+    // start_ticker((delta) => {
+    //     total_time += delta
+    //     if ((Math.round(total_time) % 90) == 0) {
+    //         if (once) {
+    //             console.log(Math.round(total_time))
+    //             once = false    
+    //         }
+    //     } else {
+    //         once = true
+    //     }
+    // })
+
 // TODO Register tick event
 //   TODO Grab cached inputs
 //   TODO Grab cached outputs (results)
@@ -96,13 +110,13 @@ let updated_model =
 
 let results = document.getElementById("results")
 
-import { render } from './render.js'
+import { render, render_item } from './render.js'
 function view() {
-// --- View ---
-// TODO Generate render of text and results
-    //model.main.innerHTML = model.content
-
-    results.innerHTML  = render(run(text_processor(model.content)))
+    let a = text_processor(model.content)
+    results.innerText = a.map(render_item)
+    let b = run(a)
+    results.innerText = render(b)
+    //results.innerHTML  = render(run(text_processor(model.content)))
 }
 
 main(init, update, view)
