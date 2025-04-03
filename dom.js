@@ -52,22 +52,22 @@ export function storageAvailable(type) {
     }
 }
 
-let lastTick = 0
-let on_tick_update_function = () => ""
+export function now() {
+    return performance.now()
+}
+
+let on_tick_update_function = (timestamp) => {}
 
 export function start_ticker(on_tick) {
     on_tick_update_function = on_tick
-    lastTick = performance.now()
+    let first_tick = performance.now()
     window.requestAnimationFrame(tick)
+    return first_tick
 }
 
 function tick(nowish) {
   window.requestAnimationFrame(tick)
-
-  const delta = nowish - lastTick
-  lastTick = nowish
-
-  on_tick_update_function(delta)
+  on_tick_update_function(nowish)
 }
 
 function isCursorInTextNode() {

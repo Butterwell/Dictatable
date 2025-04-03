@@ -26,14 +26,16 @@ import { text_processor, run } from "./dictatable.js"
 // test_run()
 
 
-import { create_load_function, create_save_function, create_keydown_function, start_ticker } from './dom.js'
+import { create_load_function, create_save_function, create_keydown_function, start_ticker, now } from './dom.js'
 
 // Event Message => Update => Model => View
 // The inital model is text.
 
 let model = {
     content: "Dictate here.",
-    view
+    view,
+    repeats: [],
+    stack: []
 }
 
 function main(init, update, view) {
@@ -60,6 +62,8 @@ function init(update, view) {
     let save = create_save_function(storage_name)
     let onKeydown = create_keydown_function(model, (text) => {
         save(text)
+        model.repeats = []
+        model.stack = []
         model.content = text
         model.view()
     })
@@ -67,6 +71,8 @@ function init(update, view) {
     let onInput = (event) => {
         let text = model.main.innerText
         save(text)
+        model.repeats = []
+        model.stack = []
         model.content = text
         model.view()
     }
@@ -76,19 +82,18 @@ function init(update, view) {
 
     window.addEventListener("load", onLoad)
 
-    let total_time = 0
-    let once = false
-    // start_ticker((delta) => {
-    //     total_time += delta
-    //     if ((Math.round(total_time) % 90) == 0) {
-    //         if (once) {
-    //             console.log(Math.round(total_time))
-    //             once = false    
-    //         }
-    //     } else {
-    //         once = true
-    //     }
-    // })
+    let onTick = (timestamp) => {
+        model.repeats.forEach((repeat) => {
+            if (timestamp > repeat.next) {
+                repeat.next += repeat.every
+                let b = run([], model.stack, repeat.code)
+                results.innerText = render(b)
+                console.log(model.stack.length)
+            } 
+        })
+    }
+
+    let first_tick = start_ticker(onTick)
 
 // TODO Register tick event
 //   TODO Grab cached inputs
@@ -99,13 +104,10 @@ function init(update, view) {
 
 function update(model, message) {
 // --- Update --
-// TODO Compute results of changes (into Model cache) (on events)
 let updated_model =
     message == "whatever" ? model :
     (message == "next" ? model :
     model) // default
-// TODO Persist Model
-// TODO Render view
 }
 
 let results = document.getElementById("results")
@@ -114,9 +116,9 @@ import { render, render_item } from './render.js'
 function view() {
     let a = text_processor(model.content)
     results.innerText = a.map(render_item)
-    let b = run(a)
+    let b = run(model.repeats, model.stack, a)
     results.innerText = render(b)
     //results.innerHTML  = render(run(text_processor(model.content)))
 }
 
-main(init, update, view)
+window.model = main(init, update, view)

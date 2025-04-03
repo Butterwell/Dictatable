@@ -56,8 +56,8 @@ import { render_item } from "./render.js";
 // TODO Error if not same type rather than ignore?
 function equal(stack, i, item, errors) {
   if (stack.length > 1) {
-    const b = stack[stack.length - 1]
-    const a = stack[stack.length - 2]
+    const b = stack[stack.length - 1].toFloat()
+    const a = stack[stack.length - 2].toFloat()
     if (a.dtype === b.dtype) {
       const tensor = tf.equal(a, b);
       stack.pop()
@@ -65,6 +65,8 @@ function equal(stack, i, item, errors) {
       a.dispose();
       b.dispose();
       stack.push(tensor);
+    } else {
+      console.log(a, b)
     }
   } else {
     errors.push({
@@ -481,11 +483,12 @@ const built_in_commands = {
 };
 
 const definitions = {}
-const repeats = []
+
+import { now } from './dom.js'
 
 // 100 every Update repeat
 // Place every specifications into repeats array
-function every_repeat_phrase(words, i, stack) {
+function every_repeat_phrase(words, i, stack, repeats) {
   if (words[i] !== "every") {
     console.log("every fail")
     return i;
@@ -496,30 +499,35 @@ function every_repeat_phrase(words, i, stack) {
     return i;
   }
 
-  let time = stack.pop()
+  // 
+  let every = stack.pop().arraySync()
   let code = []
 
   i++ // drop "every"
 
-  let repeat = { time, code }
+  let repeat = { code, every }
 
   while ((i < words.length) && (words[i] !== "repeat")) {
     repeat.code.push(words[i])
     i++
   }
+  
+  repeat.next = now() + every
+
   repeats.push(repeat)
+
+  console.log(repeats)
   return i
 }
 
-export function run(parsed) {
-  const stack = [];
+export function run(repeats, stack, parsed) {
   const errors = [];
 
   // TODO Make stack-height errors part of text_processor (as a pass)
   for (let i = 0; i < parsed.length; i++) {
     const item = parsed[i];
     if (item === "every") {
-      i = every_repeat_phrase(parsed, i, stack)
+      i = every_repeat_phrase(parsed, i, stack, repeats)
     } else if (Array.isArray(item)) {
       try {
         // Default single number to rank 0
