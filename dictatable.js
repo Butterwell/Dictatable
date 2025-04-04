@@ -258,6 +258,8 @@ function ones(stack, i, item, errors) {
   if (stack.length > 0) {
     const spec = stack.pop();
     const shape = (spec.rank === 0 ? [spec.arraySync()] : spec.arraySync());
+    if (shape.length < 4) { shape.push(1) }
+    if (shape.length < 4) { shape.push(1) }
     const tensor = tf.ones(shape, 'int32');
     spec.dispose();
     stack.push(tensor);
@@ -274,6 +276,8 @@ function zeros(stack, i, item, errors) {
   if (stack.length > 0) {
     const spec = stack.pop();
     const shape = (spec.rank === 0 ? [spec.arraySync()] : spec.arraySync());
+    if (shape.length < 4) { shape.push(1) }
+    if (shape.length < 4) { shape.push(1) }
     const tensor = tf.zeros(shape, 'int32');
     spec.dispose();
     stack.push(tensor);
@@ -290,6 +294,7 @@ function random(stack, i, item, errors) {
   if (stack.length > 0) {
     const spec = stack.pop();
     const shape = (spec.rank === 0 ? [spec.arraySync()] : spec.arraySync());
+    if (shape.length < 3) { shape.push(1) }
     const tensor = tf.randomUniform(shape, 0, 1);
     spec.dispose();
     stack.push(tensor);
