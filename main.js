@@ -27,15 +27,15 @@ let model = {
     stack: []
 }
 
-function main(init, update, view) {
-    let model = init(update, view)
+function main(init, view) {
+    let model = init(view)
     return model
 }
 
 // Counting on the browser scheduler to handle most things.
 // TODO Send longer
 
-function init(update, view) {
+function init(view) {
 // --- Initialize ---
     // Register input events
     let storage_name = "main"
@@ -97,20 +97,19 @@ function init(update, view) {
 
     let first_tick = start_ticker(onTick)
 
-// TODO Register tick event
 //   TODO Grab cached inputs
 //   TODO Grab cached outputs (results)
 //   TODO Grab cached veiw definitions
   return model // Global already... just because it's easy.
 }
 
-function update(model, message) {
-// --- Update --
-let updated_model =
-    message == "whatever" ? model :
-    (message == "next" ? model :
-    model) // default
-}
+// function update(model, message) {
+// // --- Update --
+// let updated_model =
+//     message == "whatever" ? model :
+//     (message == "next" ? model :
+//     model) // default
+// }
 
 let results = document.getElementById("results")
 let canvas = document.getElementById("canvas")
@@ -133,4 +132,4 @@ function view() {
     run_render(b, model.stack)
 }
 
-window.model = main(init, update, view)
+window.model = main(init, view)

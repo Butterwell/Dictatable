@@ -60,10 +60,12 @@ function equal(stack, i, item, errors) {
     const a = stack[stack.length - 2].toFloat()
     if (a.dtype === b.dtype) {
       const tensor = tf.equal(a, b);
-      stack.pop()
-      stack.pop()
+      let d1 = stack.pop()
+      let d2 = stack.pop()
       a.dispose();
       b.dispose();
+      d1.dispose()
+      d2.dispose()
       stack.push(tensor);
     } else {
       console.log(a, b)
@@ -516,7 +518,6 @@ function every_repeat_phrase(words, i, stack, repeats) {
 
   repeats.push(repeat)
 
-  console.log(repeats)
   return i
 }
 

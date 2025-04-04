@@ -33,15 +33,19 @@ async function expandTensorJS(tensor, scale) {
       interpolation: 'nearest'
     });
     const upsampledTensor = upsampledLayer.apply(reshapedTensor);
+    reshapedTensor.dispose()
   
     // Reshape back to the desired 2D shape
     const expandedTensor = upsampledTensor.reshape([rows, cols]);
-  
+    upsampledTensor.dispose()
     return expandedTensor;
 }
   
 export async function render_tensor_to_canvas(tensor, scale, canvas) {
     let floated = tensor.toFloat()
     let display_tensor = await expandTensorJS(floated, scale)
-    tf.browser.toPixels(display_tensor.toFloat(), canvas)
+    floated.dispose()
+    tf.browser.toPixels(display_tensor, canvas)
+    display_tensor.dispose()
+    console.log(tf.memory().numTensors, tf.memory().numBytesInGPU)
 } 
