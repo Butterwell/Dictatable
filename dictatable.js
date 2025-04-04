@@ -691,18 +691,18 @@ function is_definition(words) {
         // strip period
         let w = words[i].slice(0, -1);
         if (w.length > 0) {
-          definitions[result[result.length -1]].push(w)
+          definitions[result[result.length -1].toLowerCase()].push(w)
         }
         in_is = false
         result.pop()
       } else {
-        definitions[result[result.length -1]].push(words[i])
+        definitions[result[result.length -1].toLowerCase()].push(words[i])
       }
     } else if (words[i] === "is") {
       if (result.length > 0) {
         if (typeof result[result.length - 1] === 'string') {
           in_is = true
-          definitions[result[result.length - 1]] = []
+          definitions[result[result.length - 1].toLowerCase()] = []
         }
       }
     } else {
@@ -717,10 +717,10 @@ function expand_definitions_once(words) {
   const result = [];
 
   for (const word of words) {
-    if (definitions.hasOwnProperty(word)) {
+    if (definitions.hasOwnProperty(word.toLowerCase())) {
       // If the word exists as a key in the substitutionMap,
       // spread the corresponding array into the result.
-      result.push(...definitions[word]);
+      result.push(...definitions[word.toLowerCase()]);
     } else {
       // Otherwise, just push the original word.
       result.push(word);
