@@ -64,8 +64,6 @@ export function create_paste_function(callback) {
     }
 }
   
-  
-  
 export function storageAvailable(type) {
     var storage;
     try {

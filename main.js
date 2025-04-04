@@ -33,7 +33,14 @@ function main(init, view) {
 }
 
 // Counting on the browser scheduler to handle most things.
-// TODO Send longer
+
+function dispose_stack(stack) {
+    stack.forEach((item) => {
+        if (item instanceof tf.Tensor) {
+            item.dispose()
+        }
+    })
+}
 
 function init(view) {
 // --- Initialize ---
@@ -55,6 +62,7 @@ function init(view) {
         let text = model.main.innerText
         save(text)
         model.repeats = []
+        dispose_stack(model.stack)
         model.stack = []
         model.content = text
         model.view()
@@ -64,6 +72,7 @@ function init(view) {
         let text = model.main.innerText
         save(text)
         model.repeats = []
+        dispose_stack(model.stack)
         model.stack = []
         model.content = text
         model.view()
@@ -74,6 +83,7 @@ function init(view) {
         let text = model.main.innerText
         save(text)
         model.repeats = []
+        dispose_stack(model.stack)
         model.stack = []
         model.content = text
         model.view()

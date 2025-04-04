@@ -502,7 +502,10 @@ function every_repeat_phrase(words, i, stack, repeats) {
   }
 
   // 
-  let every = stack.pop().arraySync()
+  let every_tensor = stack.pop()
+  let every = every_tensor.arraySync()
+  every_tensor.dispose()
+  
   let code = []
 
   i++ // drop "every"

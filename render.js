@@ -1,5 +1,4 @@
 // Generate visualization from results
-// TODO Graphical
 export function render(results) {
     let lines = results.stack.map(render_item)
     return lines
