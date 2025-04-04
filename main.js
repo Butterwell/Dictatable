@@ -26,7 +26,7 @@ import { text_processor, run } from "./dictatable.js"
 // test_run()
 
 
-import { create_load_function, create_save_function, create_keydown_function, start_ticker, now } from './dom.js'
+import { create_load_function, create_save_function, create_keydown_function, create_paste_function, start_ticker, now } from './dom.js'
 
 // Event Message => Update => Model => View
 // The inital model is text.
@@ -60,7 +60,10 @@ function init(update, view) {
         console.log(text)
     })
     let save = create_save_function(storage_name)
-    let onKeydown = create_keydown_function(model, (text) => {
+
+    // Protect against <BR/> in text
+    let onKeydown = create_keydown_function(() => {
+        let text = model.main.innerText
         save(text)
         model.repeats = []
         model.stack = []
@@ -77,8 +80,19 @@ function init(update, view) {
         model.view()
     }
 
+    // create_paste_function makes paste plain text
+    let onPaste = create_paste_function(() => {
+        let text = model.main.innerText
+        save(text)
+        model.repeats = []
+        model.stack = []
+        model.content = text
+        model.view()
+    })
+
     main.addEventListener('keydown', onKeydown)
-    main.addEventListener('input', onInput);
+    main.addEventListener('input', onInput)
+    main.addEventListener('paste', onPaste)
 
     window.addEventListener("load", onLoad)
 

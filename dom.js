@@ -25,19 +25,47 @@ export function create_load_function(storage_name, callback) {
 }
 
 // Protect against <BR/> in contentEditable by adding newline instead
-export function create_keydown_function(model, callback) {
+export function create_keydown_function(callback) {
     return (event) => {
         if (event.key === 'Enter' && isCursorInTextNode()) {
             event.preventDefault();
             let element = getTextNodeAtCursor()
             // contentEditable can add <BR/> do this instead
             editTextNodeAtCursor(element, "\n")
-            let text = model.main.innerText
-            callback(text)
+            callback()
         } 
     }
 }
 
+// callback only if something changed
+export function create_paste_function(callback) {
+    return (event) => {
+        event.preventDefault(); // Prevent the default paste behavior.
+    
+        const clipboardData = event.clipboardData;
+        if (!clipboardData) return; // Handle lack of clipboard data.
+    
+        const pastedText = clipboardData.getData('text/plain');
+    
+        // Modern browsers
+        const selection = window.getSelection();
+        if (!selection) return; // Handle no selection
+
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            range.deleteContents(); // Delete any selected content.
+            range.insertNode(document.createTextNode(pastedText));
+            selection.collapseToEnd(); // Move cursor to end of pasted text.
+        } else {
+            //If no selection, just append.
+            element.appendChild(document.createTextNode(pastedText));
+        }
+        callback()
+    }
+}
+  
+  
+  
 export function storageAvailable(type) {
     var storage;
     try {
