@@ -88,7 +88,8 @@ function init(view) {
     let onTick = (timestamp) => {
         model.repeats.forEach((repeat) => {
             if (timestamp > repeat.next) {
-                repeat.next += repeat.every
+                // **Don't** play catch-up
+                repeat.next = now() + repeat.every
                 let b = run([], model.stack, repeat.code)
                 run_render(b, model.stack)
             }
