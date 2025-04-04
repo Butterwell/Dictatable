@@ -19,7 +19,11 @@ function peek(stack, i, item, errors) {
 }
 
 function and(stack, i, item, errors) {
-  if (stack.length > 1 && stack[stack.length - 1].dtype === 'bool' && stack[stack.length - 2].dtype === 'bool') {
+  if (stack.length > 1 
+    && stack[stack.length - 1] instanceof tf.Tensor
+    && stack[stack.length - 2] instanceof tf.Tensor
+    && stack[stack.length - 1].dtype === 'bool'
+    && stack[stack.length - 2].dtype === 'bool') {
     const b = stack.pop();
     const a = stack.pop();
     const tensor = tf.logicalAnd(a, b);
@@ -36,7 +40,11 @@ function and(stack, i, item, errors) {
 }
 
 function or(stack, i, item, errors) {
-  if (stack.length > 1 && stack[stack.length - 1].dtype === 'bool' && stack[stack.length - 2].dtype === 'bool') {
+  if (stack.length > 1 
+    && stack[stack.length - 1] instanceof tf.Tensor
+    && stack[stack.length - 2] instanceof tf.Tensor
+    && stack[stack.length - 1].dtype === 'bool'
+    && stack[stack.length - 2].dtype === 'bool') {
     const b = stack.pop();
     const a = stack.pop();
     const tensor = tf.logicalOr(a, b);
@@ -55,7 +63,12 @@ function or(stack, i, item, errors) {
 import { render_item } from "./render.js";
 // TODO Error if not same type rather than ignore?
 function equal(stack, i, item, errors) {
-  if (stack.length > 1) {
+  if ((stack.length > 1)
+    && (stack[stack.length - 1] instanceof tf.Tensor)
+    && (stack[stack.length - 2] instanceof tf.Tensor)
+    && stack[stack.length - 1].dtype !== 'string'
+    && stack[stack.length - 2].dtype !== 'string'
+  ) {
     const b = stack[stack.length - 1].toFloat()
     const a = stack[stack.length - 2].toFloat()
     if (a.dtype === b.dtype) {
@@ -80,21 +93,23 @@ function equal(stack, i, item, errors) {
 }
 
 function convolution(stack, i, item, errors) {
-  if (stack.length > 1 && stack[stack.length - 1].dtype !== 'string' && stack[stack.length - 2].dtype !== 'string') {
+  if (stack.length > 1 
+    && stack[stack.length - 1] instanceof tf.Tensor
+    && stack[stack.length - 2] instanceof tf.Tensor
+    && stack[stack.length - 1].rank === 4
+    && stack[stack.length - 2].rank === 3
+    && stack[stack.length - 1].dtype !== 'string'
+    && stack[stack.length - 2].dtype !== 'string') {
     const filter = stack[stack.length - 1].toFloat();
     const x = stack[stack.length - 2].toFloat();
-    if ((filter.rank === 4) && (x.rank === 3)) {
-      const y = tf.conv2d(x, filter, 1, 'same');
-      const d1 = stack.pop();
-      const d2 = stack.pop();
-      d1.dispose();
-      d2.dispose();
-      x.dispose();
-      filter.dispose();
-      stack.push(y);
-    } else {
-      console.log(filter.rank, x.rank);
-    }
+    const y = tf.conv2d(x, filter, 1, 'same');
+    const d1 = stack.pop();
+    const d2 = stack.pop();
+    d1.dispose();
+    d2.dispose();
+    x.dispose();
+    filter.dispose();
+    stack.push(y);
   } else {
     errors.push({
       index: i,
@@ -505,7 +520,7 @@ function every_repeat_phrase(words, i, stack, repeats) {
   let every_tensor = stack.pop()
   let every = every_tensor.arraySync()
   every_tensor.dispose()
-  
+
   let code = []
 
   i++ // drop "every"

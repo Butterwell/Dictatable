@@ -130,8 +130,11 @@ function run_render(run_result, stack) {
     results.innerText = render(run_result)
     if (stack.length > 0) {
         let top = stack[stack.length - 1]
-        if (top instanceof tf.Tensor) {
-            render_tensor_to_canvas(top, 4, canvas)
+        if (top instanceof tf.Tensor
+            && top.dtype !== 'string'
+            && top.rank === 3
+        ) {
+                    render_tensor_to_canvas(top, 4, canvas)
         }
     }
 }
