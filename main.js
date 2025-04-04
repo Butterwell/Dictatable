@@ -15,17 +15,6 @@
 
 import { text_processor, run } from "./dictatable.js"
 
-// console.log(parse("1 2 3 sum"))
-
-// console.log(run(parse("1 2 3 sum")))
-
-// console.log(run(parse("4 5 6 sum render to console")))
-
-// console.log(run(parse("4 5 6 sum render to new browser tab")))
-
-// test_run()
-
-
 import { create_load_function, create_save_function, create_keydown_function, create_paste_function, start_ticker, now } from './dom.js'
 
 // Event Message => Update => Model => View
@@ -101,9 +90,8 @@ function init(update, view) {
             if (timestamp > repeat.next) {
                 repeat.next += repeat.every
                 let b = run([], model.stack, repeat.code)
-                results.innerText = render(b)
-                console.log(model.stack.length)
-            } 
+                run_render(b, model.stack)
+            }
         })
     }
 
@@ -125,14 +113,24 @@ let updated_model =
 }
 
 let results = document.getElementById("results")
+let canvas = document.getElementById("canvas")
 
-import { render, render_item } from './render.js'
+import { render, render_item, render_tensor_to_canvas } from './render.js'
+function run_render(run_result, stack) {
+    results.innerText = render(run_result)
+    if (stack.length > 0) {
+        let top = stack[stack.length - 1]
+        if (top instanceof tf.Tensor) {
+            render_tensor_to_canvas(top, 4, canvas)
+        }
+    }
+}
+
 function view() {
     let a = text_processor(model.content)
     results.innerText = a.map(render_item)
     let b = run(model.repeats, model.stack, a)
-    results.innerText = render(b)
-    //results.innerHTML  = render(run(text_processor(model.content)))
+    run_render(b, model.stack)
 }
 
 window.model = main(init, update, view)
