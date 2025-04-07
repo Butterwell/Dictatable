@@ -19,14 +19,14 @@
     </section>
     <section>
         <h2 id="basics">Basics</h2>
-        <p>Just type into the area below. Try <code>30 30 random round</code>
+        <p>Just type into the area below. Try <code>30 30 random</code>
             <pre><code id="main" contenteditable="true" autofocus></code></pre>
         </p>
         <p>
             <label for="mn-canvas" class="margin-toggle">&#8853;</label>
             <input type="checkbox" id="mn-canvas" class="margin-toggle"/>
             <span class="marginnote"><canvas id="canvas"></canvas></span>
-            <code>30 30</code> puts a two element integer array on the stack. <code>random</code> pops that array and creates a thirty by thirty two-dimensional array of random numbers between zero and one. <code>round</code> pops that array and puts a array of only zeros and ones on the stack.</p>
+            <code>30 30</code> puts a two element integer array on the stack. <code>random</code> pops that array and creates a thirty by thirty two-dimensional array of random numbers between zero and one. If you add <code>round</code> to that line, it pops that array and puts a array of only zeros and ones on the stack.</p>
         <p><span class="newthought">To define a command</span>, use the keyword <code>is</code> and end the definition with <code>period</code> or <code>.</code> like this: <code>grid is 30 30 random round.</code> (or <code>Grid</code>. Every word is cast to lowercase.)
         </p>
         <p><span class="newthought">In Conway's Game of Life</span>, a cellular automata, a cell is alive in the next iteration if it's currently alive and there are two alive neighbors or if it is dead and there are three alive neighbors. The following code does that. Add it to the <code>Grid</code> definition, above.</p>
