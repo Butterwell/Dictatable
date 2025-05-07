@@ -20,11 +20,15 @@ import { create_load_function, create_save_function, create_keydown_function, cr
 // Event Message => Update => Model => View
 // The inital model is text.
 
-let model = {
-    content: "Dictate here.",
-    view,
-    repeats: [],
-    stack: []
+let model = create_model()
+
+function create_model() {
+    return {
+        content: "Dictate here.",
+        view,
+        repeats: [],
+        stack: []
+    }
 }
 
 function main(init, view) {
