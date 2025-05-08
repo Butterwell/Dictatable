@@ -151,3 +151,36 @@ function getTextNodeAtCursor() {
       return currentNode;
     }
 }
+
+// Untested, not called
+export function addContendEditableListeners(element) {
+    element.addEventListener('blur', () => {
+        if (element.textContent.startsWith('#') || element.textContent.startsWith('##')) {
+          const numberOfHashes = element.textContent.startsWith('##') ? 2 : 1;
+          element.textContent = element.textContent.substring(numberOfHashes).trimStart();
+        }
+    });
+  
+    element.addEventListener('focus', () => {
+        const originalStartsWithSingleHash = element.dataset.originalText && element.dataset.originalText.startsWith('#') && !element.dataset.originalText.startsWith('##');
+        const originalStartsWithDoubleHash = element.dataset.originalText && element.dataset.originalText.startsWith('##');
+  
+        if (!element.textContent.startsWith('#') && originalStartsWithSingleHash) {
+          element.textContent = '#' + element.textContent;
+        } else if (!element.textContent.startsWith('##') && originalStartsWithDoubleHash) {
+          element.textContent = '##' + element.textContent;
+        }
+    });
+  
+    // Store the original text on initial load
+    element.dataset.originalText = element.textContent;
+}
+
+// Untested, not called
+export function handleContentEditableHashes() {
+    const editableElements = document.querySelectorAll('[contenteditable="true"]');
+  
+    editableElements.forEach(element => {
+        addContendEditableListeners(element)
+    });
+  }
