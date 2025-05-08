@@ -47,4 +47,64 @@ export async function render_tensor_to_canvas(tensor, scale, canvas) {
     tf.browser.toPixels(display_tensor, canvas)
     display_tensor.dispose()
     console.log(tf.memory().numTensors, tf.memory().numBytesInGPU)
-} 
+}
+
+// Unused, untested
+export const canvas_pool = createCanvasPool()
+
+// Assumes 2D use
+function createCanvasPool(capacity = 10) {
+    let pool = Array.from({ length: capacity }, () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 0;
+      canvas.height = 0;
+      canvas.style.display = 'none';
+      return canvas;
+    });
+  
+    function acquire() {
+      if (pool.length > 0) {
+        const canvas = pool.pop();
+        canvas.style.display = '';
+        return canvas;
+      } else {
+        const canvas = document.createElement('canvas');
+        canvas.width = 0;
+        canvas.height = 0;
+        return canvas;
+      }
+    }
+  
+    function release(canvas) {
+      if (canvas) {
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+        pool.push(canvas);
+      }
+    }
+  
+    function resize(canvas, width, height) {
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+    }
+  
+    function clearPool() {
+      pool = [];
+    }
+  
+    function getPoolSize() {
+      return pool.length;
+    }
+  
+    return {
+      acquire,
+      release,
+      resize,
+      clearPool,
+      getPoolSize,
+    };
+  }
+  
