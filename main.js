@@ -1,18 +1,3 @@
-// async function chainGraphs() {
-//     const tensor1 = tf.tensor([1, 2, 3]);
-//     const tensor2 = tf.tensor([4, 5, 6]);
-  
-//     // Graph 1: Add tensors
-//     const graph1Output = tensor1.add(tensor2);
-  
-//     // Graph 2: Multiply by 2
-//     const graph2Output = graph1Output.mul(tf.scalar(2));
-  
-//     graph2Output.print(); // Print the final result
-// }
-  
-// chainGraphs();
-
 import { text_processor, run } from "./dictatable.js"
 
 import { create_load_function, create_save_function, create_keydown_function, create_paste_function, start_ticker, now } from './dom.js'
