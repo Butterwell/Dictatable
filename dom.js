@@ -1,26 +1,16 @@
+import { load, store } from "./persist.js"
+
 export function create_save_function(storage_name) {
-    return (text) => {
-        if (storageAvailable("localStorage")) {
-            window.localStorage.setItem(storage_name, text)
-        } else {
-            console.log("localStorage unspported")
-        }
+    return async (text) => {
+        window.localStorage.removeItem(storage_name)
+        await store(storage_name, text)
     }
 }
 
-// Knows the structure of model
 export function create_load_function(storage_name, callback) {
-    return (event) => {
-        if (storageAvailable("localStorage")) {
-            let text = window.localStorage.getItem(storage_name)
-            if (text === null) {
-                // Don't update result
-            } else {
-                callback(text)
-            }
-        } else {
-            console.log("localStorage Unsupported")
-        }
+    return async (event) => {
+        let text = await load(storage_name)
+        callback(text)
     }
 }
 

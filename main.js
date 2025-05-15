@@ -5,6 +5,22 @@ import { create_load_function, create_save_function, create_keydown_function, cr
 // Event Message => Update => Model => View
 // The inital model is text.
 
+
+const code_chunks = []
+
+function instantiate_code_chunk(source) {
+    const container = document.createElement("p")
+    const quill = new Quill(container)
+    return { source, container, quill }
+}
+
+function wire_quill(code_chunk) {
+    quill.on('text-change', (delta, oldDelta, source) => {
+        code_chunk.source = quill.getText()
+    })
+} 
+
+
 let model = create_model()
 
 function create_model() {
