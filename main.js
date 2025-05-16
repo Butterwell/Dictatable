@@ -54,49 +54,29 @@ function init(view) {
     let main = document.getElementById("main")
     model.main = main
 
+    const quill = new Quill(main, {});
+
+    quill.on('text-change', (delta, oldDelta, source) => {
+        if (source == 'api') {
+            console.log('An API call triggered this change.');
+        } else if (source == 'user') {
+            let text = quill.getText()
+            save(text)
+            model.repeats = []
+            dispose_stack(model.stack)
+            model.stack = []
+            model.content = text
+            model.view()
+        }
+    });
+
     let onLoad = create_load_function(storage_name, (text) => {
         model.content = text
         model.view()
-        model.main.innerHTML = model.content
+        quill.setContents([{ insert: text }])
         console.log(text)
     })
     let save = create_save_function(storage_name)
-
-    // Protect against <BR/> in text
-    let onKeydown = create_keydown_function(() => {
-        let text = model.main.innerText
-        save(text)
-        model.repeats = []
-        dispose_stack(model.stack)
-        model.stack = []
-        model.content = text
-        model.view()
-    })
-
-    let onInput = (event) => {
-        let text = model.main.innerText
-        save(text)
-        model.repeats = []
-        dispose_stack(model.stack)
-        model.stack = []
-        model.content = text
-        model.view()
-    }
-
-    // create_paste_function makes paste plain text
-    let onPaste = create_paste_function(() => {
-        let text = model.main.innerText
-        save(text)
-        model.repeats = []
-        dispose_stack(model.stack)
-        model.stack = []
-        model.content = text
-        model.view()
-    })
-
-    main.addEventListener('keydown', onKeydown)
-    main.addEventListener('input', onInput)
-    main.addEventListener('paste', onPaste)
 
     window.addEventListener("load", onLoad)
 

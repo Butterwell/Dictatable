@@ -2,7 +2,6 @@ import { load, store } from "./persist.js"
 
 export function create_save_function(storage_name) {
     return async (text) => {
-        window.localStorage.removeItem(storage_name)
         await store(storage_name, text)
     }
 }
@@ -54,20 +53,6 @@ export function create_paste_function(callback) {
     }
 }
   
-export function storageAvailable(type) {
-    var storage;
-    try {
-        storage = window[type];
-        var x = "__storage_test__";
-        storage.setItem(x, x);
-        storage.removeItem(x);
-        return true;
-    }
-    catch (e) {
-        return e instanceof DOMException && (e.code === 22 || e.code === 1014 || e.name === "QuotaExceededError" || e.name === "NS_ERROR_DOM_QUOTA_REACHED") && (storage && storage.length !== 0);
-    }
-}
-
 export function now() {
     return performance.now()
 }
