@@ -1,4 +1,4 @@
-import { convert_numbers_to_arrays } from "./convert_numbers_to_arrays.js";
+import { convert_numbers_to_arrays, convert_text_numbers_to_digits } from "./convert_numbers_to_arrays.js";
 
 function consoleRender(stack, i, item, errors) {
   if (stack.length > 0) {
@@ -154,8 +154,10 @@ export function text_processor(text) {
       return [];
     }
 
+    let digitfied = convert_text_numbers_to_digits(text)
+
     // If want to make new lines semantic, this is where to do it.
-    let newline_stripped = text.replace(/(\r\n|\n|\r)/gm, ' ')
+    let newline_stripped = digitfied.replace(/(\r\n|\n|\r)/gm, ' ')
   
     // Could be combined, but just do independent gathers
     let words = newline_stripped.split(" ").filter(element => element !== "");
@@ -170,6 +172,28 @@ export function text_processor(text) {
  
     return d
 }
+
+// every 200 milliseconds
+// every point two seconds
+// every tick == every one sixtith of a second
+// update every 200 milliseconds
+// Imparative phrases
+// Linear / stack based
+// add top two
+// subtract top from second from top
+// subtract second from top from top-
+
+// update on input
+// update on fetch
+
+// Every line 
+
+// With grid ...
+// Update grid by
+// every 200 milliseconds grid update
+
+// inline render grid
+// use grid as input to render
 
 const phrases = {
   // console render

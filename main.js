@@ -47,6 +47,8 @@ function dispose_stack(stack) {
     })
 }
 
+import { init_canvas_embed } from './editor.js'
+
 function init(view) {
 // --- Initialize ---
     // Register input events
@@ -54,6 +56,7 @@ function init(view) {
     let main = document.getElementById("main")
     model.main = main
 
+    init_canvas_embed(Quill)
     const quill = new Quill(main, {});
 
     quill.on('text-change', (delta, oldDelta, source) => {
@@ -132,3 +135,9 @@ function view() {
 }
 
 window.model = main(init, view)
+
+import { create_arrow_processor } from "./arrow.js"
+
+const arrow_processor = create_arrow_processor(() => { console.log("callback") })
+
+arrow_processor({ command: "something", data: "some data" })
