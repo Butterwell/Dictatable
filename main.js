@@ -141,3 +141,11 @@ import { create_arrow_processor } from "./arrow.js"
 const arrow_processor = create_arrow_processor(() => { console.log("callback") })
 
 arrow_processor({ command: "something", data: "some data" })
+
+// TODO Finish implementation
+// import { create_solver } from "./wasm-symbolic-executor/phase-0.js"
+// const { context, solver, Z3 } = create_solver('main')
+
+// import { runSymbolicExample } from "./wasm-symbolic-executor/example.js"
+
+// runSymbolicExample(context, solver, Z3)
