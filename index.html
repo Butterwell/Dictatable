@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Dictatable</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="icons/32.png">
+    <script src="./3rd-party/tf.es2017.js"></script>
+    <script src="./3rd-party/quill.js"></script>
+    <link rel="stylesheet" href="./3rd-party/tufte.css"/>
+    <link rel="stylesheet" href="main.css"/>
+</head>
+<body>
+    <article>
+    <h1 data-markdown="# Dictatable">Dictatable</h1>
+    <p class="subtitle">a stack and array language</p>
+    <!--<a href="https://github.com/Butterwell/Dictatable/issues/new/choose" target="_blank">Report Issue (need a Github account)</a>-->
+    <section>
+        <p>A language designed to be dictated. As is, it fits that criteria. However, even I don't find it particularly readable. My expectation is that as I further develop <italic>phrases</italic> the language will become more readable. What is unlikely to change is the heavy use of arrays on a stack. Take an array or two from the top of the stack and perform an operation, and put the result back on the stack. Rinse. Repeat.</p><p>Work is saved in this browser's cache from this page.</p>
+    </section>
+    <section>
+        <h2 data-markdown="## Basics">Basics</h2>
+        <p>Just type into the area below. Try <code>30 30 random</code></p>
+        <p><pre><code id="main"></code></pre></p>
+        <p>
+            <label for="mn-canvas" class="margin-toggle">&#8853;</label>
+            <input type="checkbox" id="mn-canvas" class="margin-toggle"/>
+            <span class="marginnote"><canvas id="canvas"></canvas></span>
+            <code>30 30</code> puts a two element integer array on the stack. <code>random</code> pops that array and creates a thirty by thirty two-dimensional array of random numbers between zero and one. If you add <code>round</code> to that line, it pops that array and puts a array of only zeros and ones on the stack.</p>
+        <p><span class="newthought">To define a command</span>, use the keyword <code>is</code> and end the definition with <code>period</code> or <code>.</code> like this: <code>grid is 30 30 random round.</code> (or <code>Grid</code>. Every word is cast to lowercase.)
+        </p>
+        <p><span class="newthought">In Conway's Game of Life</span>, a cellular automata, a cell is alive in the next iteration if it's currently alive and there are two alive neighbors or if it is dead and there are three alive neighbors. The following code does that. Add it to the <code>Grid</code> definition, above.</p>
+
+        <pre><code>
+Update is
+    duplicate 1 equal flip
+    duplicate 3 3 ones convolution
+    flip subtract
+    duplicate 3 equal
+    flip 2 equal
+    3 peek
+    and or
+    flip pop.
+    
+Life is
+    Grid
+    200 every Update repeat.
+    
+Life
+</code></pre>
+</section>
+<section>
+<p>The current stack in a readable(?) format.</p>
+<pre><code id="results"></code></pre>
+</section>
+</article>
+<script src="main.js" type="module"></script>
+</body>
