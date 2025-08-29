@@ -46,7 +46,7 @@ export async function render_tensor_to_canvas(tensor, scale, canvas) {
     floated.dispose()
     tf.browser.toPixels(display_tensor, canvas)
     display_tensor.dispose()
-    console.log(tf.memory().numTensors, tf.memory().numBytesInGPU)
+    //console.log(tf.memory().numTensors, tf.memory().numBytesInGPU)
 }
 
 // Unused, untested

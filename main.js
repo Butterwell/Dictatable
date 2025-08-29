@@ -61,7 +61,7 @@ function init(view) {
 
     quill.on('text-change', (delta, oldDelta, source) => {
         if (source == 'api') {
-            console.log('An API call triggered this change.');
+            //console.log('An API call triggered this change.');
         } else if (source == 'user') {
             let text = quill.getText()
             save(text)
@@ -77,7 +77,7 @@ function init(view) {
         model.content = text
         model.view()
         quill.setContents([{ insert: text }])
-        console.log(text)
+        console.log("source loaded from save")
     })
     let save = create_save_function(storage_name)
 
@@ -136,11 +136,11 @@ function view() {
 
 window.model = main(init, view)
 
-import { create_arrow_processor } from "./arrow.js"
+// import { create_arrow_processor } from "./arrow.js"
 
-const arrow_processor = create_arrow_processor(() => { console.log("callback") })
+// const arrow_processor = create_arrow_processor(() => { console.log("callback") })
 
-arrow_processor({ command: "something", data: "some data" })
+// arrow_processor({ command: "something", data: "some data" })
 
 // TODO Finish implementation
 // import { create_solver } from "./wasm-symbolic-executor/phase-0.js"
