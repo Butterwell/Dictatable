@@ -1,6 +1,7 @@
 # Dictatable
 
-Dictatable is an array and stack oriented language that is designed to be dictatable.
+Dictatable is a table oriented language that is designed to be utterable.
+That is: Code More Like How You Think
 
 As you might guess, the primary goal is to make a useful language that is dictatable on a smart phone.
 

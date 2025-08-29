@@ -144,7 +144,7 @@ async function cleanup_database(dbNameToDelete) {
   }
 }
 
-async function main() {
+async function test() {
   await cleanup_database(database_name)
   await initializeDatabase(); // Ensure the database is ready
 
@@ -178,4 +178,4 @@ async function main() {
   await cleanup_database(database_name)
 }
 
-//main();
+//test();
